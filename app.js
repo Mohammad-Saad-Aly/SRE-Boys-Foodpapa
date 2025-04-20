@@ -19,7 +19,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 const firebaseConfig = {
-  // apni apni lagao API key.
+  apiKey: "AIzaSyBqkUtMlqxEY7bpDxdaktxSx1HEzKaTzCo",
+  authDomain: "foodpapa-82a1d.firebaseapp.com",
+  projectId: "foodpapa-82a1d",
+  storageBucket: "foodpapa-82a1d.firebasestorage.app",
+  messagingSenderId: "747779474693",
+  appId: "1:747779474693:web:2c1d4f1f763bcbbaf7e36c",
+  measurementId: "G-GFQS03D48Y",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -42,7 +48,6 @@ onAuthStateChanged(auth, (user) => {
     }
   }
 });
-
 
 function handleSignup() {
   const email = document.getElementById("email").value;
@@ -228,3 +233,75 @@ window.saveProductChanges = async function () {
     });
   }
 };
+
+let userDiv = document.getElementById("userDiv");
+async function userData() {
+  const querySnapshot = await getDocs(collection(db, "items"));
+  querySnapshot.forEach((doc) => {
+    userDiv.innerHTML += `<div class="card" style="width: 22rem;">
+    <img src=${doc.data().product_url} class="card-img-top" alt="Image">
+    <div class="card-body">
+      <h5 class="card-title">${doc.data().product_name}</h5>
+      <p class="card-text">${doc.data().product_des}</p>
+      <h5 class="card-title">${doc.data().product_price}</h5>
+      </div>
+      <button onclick='addtocart("${doc.id}", "${doc.data().product_name}", "${
+      doc.data().product_price
+    }", "${doc.data().product_des}", "${
+      doc.data().product_url
+    }")' class='btn btn-primary'> Add to Cart </button>
+  </div>`;
+  });
+}
+if (userDiv) {
+  userData();
+}
+
+let num = 0;
+const cart = document.getElementById("cart-badge");
+
+async function addtocart(id, name, price, des, url) {
+  try {
+    const docRef = await addDoc(collection(db, "carts"), {
+      id: id,
+      name: name,
+      price: price,
+      des: des,
+      url: url,
+    });
+    Swal.fire({
+      title: "Product Add to cart Successfully",
+      text: `your order id is ${docRef.id}`,
+      icon: "success",
+    });
+    getProductList();
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+  num++;
+  cart.innerHTML = num;
+}
+window.addtocart = addtocart;
+
+
+let showCart = document.getElementById("showCart");
+async function cartData() {
+  const querySnapshot = await getDocs(collection(db, "carts"));
+  querySnapshot.forEach((doc) => {
+    showCart.innerHTML += `<div class="card" style="width: 22rem;">
+    <img src=${doc.data().url} class="card-img-top" alt="Image">
+    <div class="card-body">
+      <h5 class="card-title">${doc.data().name}</h5>
+      <p class="card-text">${doc.data().des}</p>
+      <h5 class="card-title">${doc.data().price}</h5>
+      </div>
+      <div class='d-flex justify-content-around'>
+      <button class='btn btn-warning'> + </button>
+      <button class='btn btn-danger'> - </button>
+      </div>
+      </div>`;
+  });
+}
+if(showCart){
+  cartData();
+}
